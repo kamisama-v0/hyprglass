@@ -1,7 +1,8 @@
 # Fork hyprglass — catatan perawatan (kara / Omarchy)
 
 Fork lokal dari https://github.com/hyprnux/hyprglass untuk dock Omarchy (`rosakodu.dock`, layer namespace
-`omarchy-dock`). Remote `upstream` = repo asli. Branch kerja: `kara/hyprland-0.56`.
+`omarchy-dock`). Remote `upstream` = repo asli, `origin` = fork GitHub git@github.com:kamisama-v0/hyprglass.git
+(push dengan key ~/.ssh/id_ed25519_ztzyrant, akun zTzyrant). Branch kerja: `kara/hyprland-0.56`.
 
 ## Cara dipasang
 - hyprpm memakai repo INI langsung: `hyprpm add /home/kara/Documents/omarchy/dock/hyprglass`
