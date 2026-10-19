@@ -116,6 +116,10 @@ void registerConfig(HANDLE handle) {
     addConfigValue<Config::Values::Float>(handle, ConfigKeys::ADAPTIVE_BOOST, Config::FLOAT{SENTINEL_FLOAT});
     addConfigValue<Config::Values::Float>(handle, ConfigKeys::REFRACTION_FLOW, Config::FLOAT{GlobalDefaults::REFRACTION_FLOW});
     addConfigValue<Config::Values::Float>(handle, ConfigKeys::REFRACTION_SPREAD, Config::FLOAT{GlobalDefaults::REFRACTION_SPREAD});
+    addConfigValue<Config::Values::Float>(handle, ConfigKeys::EDGE_LENS, Config::FLOAT{GlobalDefaults::EDGE_LENS});
+    addConfigValue<Config::Values::Float>(handle, ConfigKeys::EDGE_LENS_HEIGHT, Config::FLOAT{GlobalDefaults::EDGE_LENS_HEIGHT});
+    addConfigValue<Config::Values::Float>(handle, ConfigKeys::EDGE_LENS_AMOUNT, Config::FLOAT{GlobalDefaults::EDGE_LENS_AMOUNT});
+    addConfigValue<Config::Values::Float>(handle, ConfigKeys::SPECTRAL_DISPERSION, Config::FLOAT{GlobalDefaults::SPECTRAL_DISPERSION});
     addConfigValue<Config::Values::Float>(handle, ConfigKeys::FRESNEL_TINT, Config::FLOAT{GlobalDefaults::FRESNEL_TINT});
     addConfigValue<Config::Values::Float>(handle, ConfigKeys::BEVEL_STRENGTH, Config::FLOAT{GlobalDefaults::BEVEL_STRENGTH});
     addConfigValue<Config::Values::Float>(handle, ConfigKeys::BEVEL_SIZE, Config::FLOAT{GlobalDefaults::BEVEL_SIZE});
@@ -149,6 +153,10 @@ void registerConfig(HANDLE handle) {
     addConfigValue<Config::Values::Float>(handle, ConfigKeys::DARK_ADAPTIVE_BOOST, Config::FLOAT{SENTINEL_FLOAT});
     addConfigValue<Config::Values::Float>(handle, ConfigKeys::DARK_REFRACTION_FLOW, Config::FLOAT{SENTINEL_FLOAT});
     addConfigValue<Config::Values::Float>(handle, ConfigKeys::DARK_REFRACTION_SPREAD, Config::FLOAT{SENTINEL_FLOAT});
+    addConfigValue<Config::Values::Float>(handle, ConfigKeys::DARK_EDGE_LENS, Config::FLOAT{SENTINEL_FLOAT});
+    addConfigValue<Config::Values::Float>(handle, ConfigKeys::DARK_EDGE_LENS_HEIGHT, Config::FLOAT{SENTINEL_FLOAT});
+    addConfigValue<Config::Values::Float>(handle, ConfigKeys::DARK_EDGE_LENS_AMOUNT, Config::FLOAT{SENTINEL_FLOAT});
+    addConfigValue<Config::Values::Float>(handle, ConfigKeys::DARK_SPECTRAL_DISPERSION, Config::FLOAT{SENTINEL_FLOAT});
     addConfigValue<Config::Values::Float>(handle, ConfigKeys::DARK_FRESNEL_TINT, Config::FLOAT{SENTINEL_FLOAT});
     addConfigValue<Config::Values::Float>(handle, ConfigKeys::DARK_BEVEL_STRENGTH, Config::FLOAT{SENTINEL_FLOAT});
     addConfigValue<Config::Values::Float>(handle, ConfigKeys::DARK_BEVEL_SIZE, Config::FLOAT{SENTINEL_FLOAT});
@@ -182,6 +190,10 @@ void registerConfig(HANDLE handle) {
     addConfigValue<Config::Values::Float>(handle, ConfigKeys::LIGHT_ADAPTIVE_BOOST, Config::FLOAT{SENTINEL_FLOAT});
     addConfigValue<Config::Values::Float>(handle, ConfigKeys::LIGHT_REFRACTION_FLOW, Config::FLOAT{SENTINEL_FLOAT});
     addConfigValue<Config::Values::Float>(handle, ConfigKeys::LIGHT_REFRACTION_SPREAD, Config::FLOAT{SENTINEL_FLOAT});
+    addConfigValue<Config::Values::Float>(handle, ConfigKeys::LIGHT_EDGE_LENS, Config::FLOAT{SENTINEL_FLOAT});
+    addConfigValue<Config::Values::Float>(handle, ConfigKeys::LIGHT_EDGE_LENS_HEIGHT, Config::FLOAT{SENTINEL_FLOAT});
+    addConfigValue<Config::Values::Float>(handle, ConfigKeys::LIGHT_EDGE_LENS_AMOUNT, Config::FLOAT{SENTINEL_FLOAT});
+    addConfigValue<Config::Values::Float>(handle, ConfigKeys::LIGHT_SPECTRAL_DISPERSION, Config::FLOAT{SENTINEL_FLOAT});
     addConfigValue<Config::Values::Float>(handle, ConfigKeys::LIGHT_FRESNEL_TINT, Config::FLOAT{SENTINEL_FLOAT});
     addConfigValue<Config::Values::Float>(handle, ConfigKeys::LIGHT_BEVEL_STRENGTH, Config::FLOAT{SENTINEL_FLOAT});
     addConfigValue<Config::Values::Float>(handle, ConfigKeys::LIGHT_BEVEL_SIZE, Config::FLOAT{SENTINEL_FLOAT});
@@ -230,6 +242,8 @@ static void initOverridablePointers(HANDLE handle, SOverridableConfig& layer,
                                     const char* vibrancyDarkness, const char* adaptiveDim,
                                     const char* adaptiveBoost,
                                     const char* refractionFlow, const char* refractionSpread,
+                                    const char* edgeLens, const char* edgeLensHeight,
+                                    const char* edgeLensAmount, const char* spectralDispersion,
                                     const char* fresnelTint, const char* bevelStrength,
                                     const char* bevelSize, const char* fresnelColor,
                                     const char* bevelColor, const char* bevelTint,
@@ -256,6 +270,10 @@ static void initOverridablePointers(HANDLE handle, SOverridableConfig& layer,
     layer.adaptiveBoost       = getStaticPtr<Hyprlang::FLOAT>(handle, adaptiveBoost);
     layer.refractionFlow      = getStaticPtr<Hyprlang::FLOAT>(handle, refractionFlow);
     layer.refractionSpread    = getStaticPtr<Hyprlang::FLOAT>(handle, refractionSpread);
+    layer.edgeLens            = getStaticPtr<Hyprlang::FLOAT>(handle, edgeLens);
+    layer.edgeLensHeight      = getStaticPtr<Hyprlang::FLOAT>(handle, edgeLensHeight);
+    layer.edgeLensAmount      = getStaticPtr<Hyprlang::FLOAT>(handle, edgeLensAmount);
+    layer.spectralDispersion  = getStaticPtr<Hyprlang::FLOAT>(handle, spectralDispersion);
     layer.fresnelTint         = getStaticPtr<Hyprlang::FLOAT>(handle, fresnelTint);
     layer.bevelStrength       = getStaticPtr<Hyprlang::FLOAT>(handle, bevelStrength);
     layer.bevelSize           = getStaticPtr<Hyprlang::FLOAT>(handle, bevelSize);
@@ -317,6 +335,8 @@ void initConfigPointers(HANDLE handle, SPluginConfig& config) {
         ConfigKeys::VIBRANCY_DARKNESS, ConfigKeys::ADAPTIVE_DIM,
         ConfigKeys::ADAPTIVE_BOOST,
         ConfigKeys::REFRACTION_FLOW, ConfigKeys::REFRACTION_SPREAD,
+        ConfigKeys::EDGE_LENS, ConfigKeys::EDGE_LENS_HEIGHT,
+        ConfigKeys::EDGE_LENS_AMOUNT, ConfigKeys::SPECTRAL_DISPERSION,
         ConfigKeys::FRESNEL_TINT, ConfigKeys::BEVEL_STRENGTH,
         ConfigKeys::BEVEL_SIZE, ConfigKeys::FRESNEL_COLOR,
         ConfigKeys::BEVEL_COLOR, ConfigKeys::BEVEL_TINT,
@@ -335,6 +355,8 @@ void initConfigPointers(HANDLE handle, SPluginConfig& config) {
         ConfigKeys::DARK_VIBRANCY_DARKNESS, ConfigKeys::DARK_ADAPTIVE_DIM,
         ConfigKeys::DARK_ADAPTIVE_BOOST,
         ConfigKeys::DARK_REFRACTION_FLOW, ConfigKeys::DARK_REFRACTION_SPREAD,
+        ConfigKeys::DARK_EDGE_LENS, ConfigKeys::DARK_EDGE_LENS_HEIGHT,
+        ConfigKeys::DARK_EDGE_LENS_AMOUNT, ConfigKeys::DARK_SPECTRAL_DISPERSION,
         ConfigKeys::DARK_FRESNEL_TINT, ConfigKeys::DARK_BEVEL_STRENGTH,
         ConfigKeys::DARK_BEVEL_SIZE, ConfigKeys::DARK_FRESNEL_COLOR,
         ConfigKeys::DARK_BEVEL_COLOR, ConfigKeys::DARK_BEVEL_TINT,
@@ -353,6 +375,8 @@ void initConfigPointers(HANDLE handle, SPluginConfig& config) {
         ConfigKeys::LIGHT_VIBRANCY_DARKNESS, ConfigKeys::LIGHT_ADAPTIVE_DIM,
         ConfigKeys::LIGHT_ADAPTIVE_BOOST,
         ConfigKeys::LIGHT_REFRACTION_FLOW, ConfigKeys::LIGHT_REFRACTION_SPREAD,
+        ConfigKeys::LIGHT_EDGE_LENS, ConfigKeys::LIGHT_EDGE_LENS_HEIGHT,
+        ConfigKeys::LIGHT_EDGE_LENS_AMOUNT, ConfigKeys::LIGHT_SPECTRAL_DISPERSION,
         ConfigKeys::LIGHT_FRESNEL_TINT, ConfigKeys::LIGHT_BEVEL_STRENGTH,
         ConfigKeys::LIGHT_BEVEL_SIZE, ConfigKeys::LIGHT_FRESNEL_COLOR,
         ConfigKeys::LIGHT_BEVEL_COLOR, ConfigKeys::LIGHT_BEVEL_TINT,
@@ -395,6 +419,10 @@ static bool setPresetFloatField(SPresetValues& values, std::string_view key, std
     if (key == "adaptive_boost")       { values.adaptiveBoost = parsed; return true; }
     if (key == "refraction_flow")      { values.refractionFlow = parsed; return true; }
     if (key == "refraction_spread")    { values.refractionSpread = parsed; return true; }
+    if (key == "edge_lens")            { values.edgeLens = parsed; return true; }
+    if (key == "edge_lens_height")     { values.edgeLensHeight = parsed; return true; }
+    if (key == "edge_lens_amount")     { values.edgeLensAmount = parsed; return true; }
+    if (key == "spectral_dispersion")  { values.spectralDispersion = parsed; return true; }
     if (key == "fresnel_tint")         { values.fresnelTint = parsed; return true; }
     if (key == "bevel_strength")       { values.bevelStrength = parsed; return true; }
     if (key == "bevel_size")           { values.bevelSize = parsed; return true; }
@@ -456,6 +484,10 @@ static void mergePresetValues(SPresetValues& target, const SPresetValues& overri
     mergeFloat(target.adaptiveBoost, overrides.adaptiveBoost);
     mergeFloat(target.refractionFlow, overrides.refractionFlow);
     mergeFloat(target.refractionSpread, overrides.refractionSpread);
+    mergeFloat(target.edgeLens, overrides.edgeLens);
+    mergeFloat(target.edgeLensHeight, overrides.edgeLensHeight);
+    mergeFloat(target.edgeLensAmount, overrides.edgeLensAmount);
+    mergeFloat(target.spectralDispersion, overrides.spectralDispersion);
     mergeFloat(target.fresnelTint, overrides.fresnelTint);
     mergeFloat(target.bevelStrength, overrides.bevelStrength);
     mergeFloat(target.bevelSize, overrides.bevelSize);

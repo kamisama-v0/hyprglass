@@ -24,6 +24,10 @@ struct SGlassUniforms {
     GLint adaptiveBoost = -1;
     GLint refractionFlow = -1;
     GLint refractionSpread = -1;
+    GLint edgeLens = -1;
+    GLint edgeLensHeight = -1;
+    GLint edgeLensAmount = -1;
+    GLint spectralDispersion = -1;
     GLint fresnelTint = -1;
     GLint bevelStrength = -1;
     GLint bevelSize = -1;

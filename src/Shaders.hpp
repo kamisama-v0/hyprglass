@@ -59,6 +59,10 @@ uniform float roundingPower;
 uniform float invRoundingPower; // = 1.0 / roundingPower, hoisted per-draw
 uniform float refractionFlow;
 uniform float refractionSpread;
+uniform float edgeLens;           // kara: 0 = hyprglass edge refraction, 1 = Kyant lens (blend between)
+uniform float edgeLensHeight;     // lens band width from the edge, fraction of the glass box short side
+uniform float edgeLensAmount;     // max outward sample offset at the edge, fraction of the short side
+uniform float spectralDispersion; // > 0.5: Kyant 7-band dispersion instead of per-channel RGB
 uniform float fresnelTint;
 uniform float bevelStrength;
 uniform float bevelSize;
@@ -245,6 +249,36 @@ vec2 sdfOutwardNormal(vec2 uv) {
 }
 
 // ============================================================================
+// KYANT LENS (kara) — ported from Kyant0/AndroidLiquidGlass ("backdrop", Apache-2.0),
+// the shader SimpMusic ships. Coordinates are pixels from the glass box centre.
+// Inside a band of edgeLensHeight from the rim the sample is pushed OUTWARD along the
+// rounded-rect SDF gradient by circleMap(1 - depth/height): zero at the band's inner
+// edge, steepest at the rim — a convex lens rim with a crisp, undistorted centre.
+// ============================================================================
+
+float kyantSdRoundedRect(vec2 c, vec2 halfSize, float r) {
+    vec2 q = abs(c) - (halfSize - vec2(r));
+    return length(max(q, 0.0)) - r + min(max(q.x, q.y), 0.0);
+}
+
+// gradient of the SDF above; the corner radius passed in is radius * 1.5 (as Kyant does)
+// so the direction field turns smoothly round the corners
+vec2 kyantGradSdRoundedRect(vec2 c, vec2 halfSize, float r) {
+    vec2 q = abs(c) - (halfSize - vec2(r));
+    if (q.x >= 0.0 || q.y >= 0.0) {
+        vec2 m = max(q, 0.0);
+        float len = length(m);
+        if (len > 0.0) return sign(c) * (m / len);   // Kyant's normalize(), guarded against 0/0
+    }
+    float gx = step(q.y, q.x);
+    return sign(c) * vec2(gx, 1.0 - gx);
+}
+
+float kyantCircleMap(float x) {
+    return 1.0 - sqrt(max(1.0 - x * x, 0.0));
+}
+
+// ============================================================================
 // MAIN — Thick-glass refraction model
 // ============================================================================
 
@@ -355,6 +389,26 @@ void main() {
     }
     vec2 baseOffset = dir * refractionMag * invFullSize;
 
+    // Kyant lens (kara): replaces / blends with the edge refraction above.
+    vec2 kyantDispersion = vec2(0.0);
+    if (edgeLens > 0.001) {
+        vec2  kHalf   = glassBoxSizePx * 0.5;
+        vec2  kc      = uv * fullSize - glassBoxOffsetPx - kHalf;
+        float kMin    = min(kHalf.x, kHalf.y);
+        float kRadius = min(pickCornerRadius(kc, radii), kMin);
+        float kHeight = max(edgeLensHeight * 2.0 * kMin, 1e-3);
+        float kSd     = min(kyantSdRoundedRect(kc, kHalf, kRadius), 0.0);
+        vec2  kOffPx  = vec2(0.0);
+        if (-kSd < kHeight) {
+            float kd = kyantCircleMap(1.0 - (-kSd) / kHeight) * edgeLensAmount * 2.0 * kMin;
+            vec2  kg = kyantGradSdRoundedRect(kc, kHalf, min(kRadius * 1.5, kMin));
+            kOffPx = kd * kg;
+            // dispersion grows toward the corners (x*y quadrant product), as in Kyant's shader
+            kyantDispersion = kOffPx * chromaticAberration * (kc.x * kc.y) / max(kHalf.x * kHalf.y, 1e-3) * invFullSize;
+        }
+        baseOffset = mix(baseOffset, kOffPx * invFullSize, edgeLens);
+    }
+
     // ========================================
     // CHROMATIC ABERRATION — per-channel refraction scale
     // Blue refracts more than red → natural spectral fringing at edges.
@@ -389,7 +443,23 @@ void main() {
     vec2 uvG = uv + offsetG + domeUV;
     vec2 uvB = uv + offsetB + domeUV;
 
-    if (chromaticAberration > 0.001 && edgeProximity > 0.01) {
+    // dispersion is zero outside the lens band: skip the 7 taps there (most of the surface)
+    if (spectralDispersion > 0.5 && dot(kyantDispersion, kyantDispersion) > 1e-12) {
+        // Kyant 7-band spectral dispersion: red..purple sampled along the dispersion vector,
+        // weights sum to 1 per channel (r: 3/3.5 + 1/7, g: 1/7 + 3/3.5, b: 3 * 1/3)
+        vec2 c0 = uvG;
+        vec2 dd = kyantDispersion;
+        vec3 red    = sampleBlurred(c0 + dd).rgb;
+        vec3 orange = sampleBlurred(c0 + dd * (2.0 / 3.0)).rgb;
+        vec3 yellow = sampleBlurred(c0 + dd * (1.0 / 3.0)).rgb;
+        vec3 green  = sampleBlurred(c0).rgb;
+        vec3 cyan   = sampleBlurred(c0 - dd * (1.0 / 3.0)).rgb;
+        vec3 blue   = sampleBlurred(c0 - dd * (2.0 / 3.0)).rgb;
+        vec3 purple = sampleBlurred(c0 - dd).rgb;
+        color.r = (red.r + orange.r + yellow.r) / 3.5 + purple.r / 7.0;
+        color.g = orange.g / 7.0 + (yellow.g + green.g + cyan.g) / 3.5;
+        color.b = (cyan.b + blue.b + purple.b) / 3.0;
+    } else if (chromaticAberration > 0.001 && edgeProximity > 0.01) {
         color.r = sampleBlurred(uvR).r;
         color.g = sampleBlurred(uvG).g;
         color.b = sampleBlurred(uvB).b;
