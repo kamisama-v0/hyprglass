@@ -12,11 +12,32 @@ Fork lokal dari https://github.com/hyprnux/hyprglass untuk dock Omarchy (`rosako
 - Config: `~/.config/hypr/looknfeel.lua`, blok `if hl.plugin.hyprglass then … else … end`
   (glass hanya untuk layer `omarchy-dock`; `enabled = false` agar jendela tidak ber-glass dan shadow global tetap mati).
 
+## Fitur tambahan fork: lensa tepi Kyant (2026-10-19)
+Port shader AGSL dari Kyant0/AndroidLiquidGlass (`io.github.kyant0:backdrop`, Apache-2.0) yang dipakai SimpMusic.
+Parameter baru (global, `dark:`/`light:`, preset, Lua `hg.preset`), default MATI sehingga preset bawaan tidak berubah:
+| Key | Default | Arti |
+| --- | --- | --- |
+| `edge_lens` | 0 | 0 = refraksi tepi hyprglass asli, 1 = lensa Kyant, di antaranya = campuran |
+| `edge_lens_height` | 0.25 | lebar pita lensa dari tepi (pecahan sisi pendek; layer bermask: × 64 px × skala monitor) |
+| `edge_lens_amount` | 0.5 | geser sampel maksimal KE LUAR di tepi (pecahan yang sama) |
+| `spectral_dispersion` | 0 | > 0.5 = dispersi 7 warna Kyant (kuat di sudut) menggantikan aberasi RGB; kekuatan = `chromatic_aberration` |
+- Box (jendela/subsurface): SDF rounded-rect + gradien (radius × 1.5) persis Kyant.
+- Layer alpha-mask (dock, notifikasi, menu — surface sering selayar penuh): tepi dicari dari mask (4 arah, maks 12 langkah,
+  hanya di dalam pita) karena box layer ≠ bentuk yang terlihat. Tanpa ini kartu notifikasi jadi hitam (sampel ratusan px keluar).
+- Dipakai lewat preset Lua `kara-glass` (inherits `glass`) di `~/.config/hypr/looknfeel.lua`.
+- Shader diuji: `glslangValidator -S frag` atas string `liquidglass.frag` (buang baris kosong di depan `#version`).
+
 ## Pengaman versi (tidak crash)
 1. hyprpm hanya memuat build yang cocok dengan header Hyprland yang sedang jalan.
 2. hyprglass memeriksa versi sendiri; kalau beda, ia "paused" (tidak menggambar apa-apa), bukan crash.
 3. Kalau plugin tidak termuat, blok `else` di looknfeel.lua memberi dock blur Hyprland biasa.
 Cek kapan saja: `hyprctl hyprglass status` (harus `active` + `version check: match`).
+
+## Saat paket Hyprland di-update
+- Sejak `hyprland 0.56.2-4` perintah `hyprpm` ada di PAKET TERPISAH `hyprpm` (tidak ikut terpasang). Tanpa itu autostart
+  `hyprpm reload` gagal dan SEMUA plugin tidak termuat (gejala: "unknown config key plugin.hyprexpo.*", dock blur cadangan).
+  Pasang + tandai explicit: `sudo pacman -S hyprpm hyprwayland-scanner && sudo pacman -D --asexplicit hyprpm hyprwayland-scanner`
+  (`hyprwayland-scanner` dibutuhkan build plugin; sempat terhapus lewat prompt "Remove orphaned packages"). `kara-check` mengecek keduanya.
 
 ## Saat Hyprland di-update
 1. `hyprctl version` -> catat commit baru. `git fetch upstream`.
