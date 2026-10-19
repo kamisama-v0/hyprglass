@@ -49,10 +49,6 @@ bool CShaderManager::compileGlassShader() {
     glassUniforms.adaptiveBoost       = glGetUniformLocation(program, "adaptiveBoost");
     glassUniforms.refractionFlow      = glGetUniformLocation(program, "refractionFlow");
     glassUniforms.refractionSpread    = glGetUniformLocation(program, "refractionSpread");
-    glassUniforms.edgeLens            = glGetUniformLocation(program, "edgeLens");
-    glassUniforms.edgeLensHeight      = glGetUniformLocation(program, "edgeLensHeight");
-    glassUniforms.edgeLensAmount      = glGetUniformLocation(program, "edgeLensAmount");
-    glassUniforms.spectralDispersion  = glGetUniformLocation(program, "spectralDispersion");
     glassUniforms.fresnelTint         = glGetUniformLocation(program, "fresnelTint");
     glassUniforms.bevelStrength       = glGetUniformLocation(program, "bevelStrength");
     glassUniforms.bevelSize           = glGetUniformLocation(program, "bevelSize");

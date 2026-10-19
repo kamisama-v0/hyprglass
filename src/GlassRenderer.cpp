@@ -487,10 +487,6 @@ void applyGlassEffect(SP<Render::IFramebuffer> sampleFramebuffer, SP<Render::IFr
     glUniform1f(uniforms.lensDistortion,      lensDistortionValue);
     glUniform1f(uniforms.refractionFlow,      resolvePresetFloat(resolveContext, &SPresetValues::refractionFlow, &SOverridableConfig::refractionFlow));
     glUniform1f(uniforms.refractionSpread,    resolvePresetFloat(resolveContext, &SPresetValues::refractionSpread, &SOverridableConfig::refractionSpread));
-    glUniform1f(uniforms.edgeLens,            resolvePresetFloat(resolveContext, &SPresetValues::edgeLens, &SOverridableConfig::edgeLens));
-    glUniform1f(uniforms.edgeLensHeight,      resolvePresetFloat(resolveContext, &SPresetValues::edgeLensHeight, &SOverridableConfig::edgeLensHeight));
-    glUniform1f(uniforms.edgeLensAmount,      resolvePresetFloat(resolveContext, &SPresetValues::edgeLensAmount, &SOverridableConfig::edgeLensAmount));
-    glUniform1f(uniforms.spectralDispersion,  resolvePresetFloat(resolveContext, &SPresetValues::spectralDispersion, &SOverridableConfig::spectralDispersion));
     glUniform1f(uniforms.fresnelTint,         resolvePresetFloat(resolveContext, &SPresetValues::fresnelTint, &SOverridableConfig::fresnelTint));
     glUniform1f(uniforms.bevelStrength,       resolvePresetFloat(resolveContext, &SPresetValues::bevelStrength, &SOverridableConfig::bevelStrength));
     glUniform1f(uniforms.bevelSize,           resolvePresetFloat(resolveContext, &SPresetValues::bevelSize, &SOverridableConfig::bevelSize));

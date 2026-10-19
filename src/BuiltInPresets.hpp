@@ -40,13 +40,6 @@ namespace GlobalDefaults {
     inline constexpr float   LENS_DISTORTION      = 0.5f;
     inline constexpr float   REFRACTION_FLOW      = 0.0f;
     inline constexpr float   REFRACTION_SPREAD    = 1.0f;
-    // kara: Kyant/AndroidLiquidGlass edge lens (circle-map profile along the rounded-rect SDF gradient).
-    // 0 = original hyprglass edge refraction (default, presets unchanged), 1 = Kyant lens, between = blend.
-    inline constexpr float   EDGE_LENS            = 0.0f;
-    inline constexpr float   EDGE_LENS_HEIGHT     = 0.25f; // band width from the edge, fraction of the short side
-    inline constexpr float   EDGE_LENS_AMOUNT     = 0.5f;  // max sample offset at the edge, fraction of the short side
-    // 0 = per-channel RGB chromatic aberration, 1 = Kyant 7-band spectral dispersion (strongest at corners)
-    inline constexpr float   SPECTRAL_DISPERSION  = 0.0f;
     inline constexpr float   FRESNEL_TINT         = 0.0f;
     inline constexpr float   BEVEL_STRENGTH       = 0.0f;
     inline constexpr float   BEVEL_SIZE           = 6.0f;
