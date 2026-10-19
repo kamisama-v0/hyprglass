@@ -12,21 +12,12 @@ Fork lokal dari https://github.com/hyprnux/hyprglass untuk dock Omarchy (`rosako
 - Config: `~/.config/hypr/looknfeel.lua`, blok `if hl.plugin.hyprglass then … else … end`
   (glass hanya untuk layer `omarchy-dock`; `enabled = false` agar jendela tidak ber-glass dan shadow global tetap mati).
 
-## Fitur tambahan fork: lensa tepi Kyant (2026-10-19)
-Port shader AGSL dari Kyant0/AndroidLiquidGlass (`io.github.kyant0:backdrop`, Apache-2.0) yang dipakai SimpMusic.
-Parameter baru (global, `dark:`/`light:`, preset, Lua `hg.preset`), default MATI sehingga preset bawaan tidak berubah:
-| Key | Default | Arti |
-| --- | --- | --- |
-| `edge_lens` | 0 | 0 = refraksi tepi hyprglass asli, 1 = lensa Kyant, di antaranya = campuran |
-| `edge_lens_height` | 0.25 | lebar pita lensa dari tepi (pecahan sisi pendek; layer bermask: × 64 px × skala monitor) |
-| `edge_lens_amount` | 0.5 | geser sampel maksimal KE LUAR di tepi (pecahan yang sama) |
-| `spectral_dispersion` | 0 | > 0.5 = dispersi 7 warna Kyant (kuat di sudut) menggantikan aberasi RGB; kekuatan = `chromatic_aberration` |
-- Box (jendela/subsurface): SDF rounded-rect + gradien (radius × 1.5) persis Kyant.
-- Layer alpha-mask (dock, notifikasi, menu — surface sering selayar penuh): tepi dicari dari mask (4 arah, maks 12 langkah,
-  hanya di dalam pita) karena box layer ≠ bentuk yang terlihat. Tanpa ini kartu notifikasi jadi hitam (sampel ratusan px keluar).
-- Dipakai lewat preset Lua `kara-glass` (inherits `glass`) di `~/.config/hypr/looknfeel.lua`.
-- Shader diuji: `glslangValidator -S frag` atas string `liquidglass.frag` (buang baris kosong di depan `#version`).
-
+## Riwayat: lensa tepi Kyant (dicoba lalu DIBUANG, 2026-10-19)
+Port shader AGSL Kyant0/AndroidLiquidGlass (dipakai SimpMusic) sempat ditambahkan (commit `3692942`, `e1daa09`:
+parameter `edge_lens`, `edge_lens_height`, `edge_lens_amount`, `spectral_dispersion`; tepi dari mask untuk layer
+selayar penuh). User menilai tepinya jelek di dock/widget, jadi `src/` dikembalikan ke v0.10.0 (`33809e3`) dan pin
+kembali ke `84c1a5a`. Kalau mau dicoba lagi: `git show 3692942 e1daa09`. Pelajaran: lensa Kyant butuh ukuran bentuk
+per elemen (di Android tiap tombol punya layer sendiri); layer Omarchy sering selayar penuh dengan banyak kartu.
 ## Pengaman versi (tidak crash)
 1. hyprpm hanya memuat build yang cocok dengan header Hyprland yang sedang jalan.
 2. hyprglass memeriksa versi sendiri; kalau beda, ia "paused" (tidak menggambar apa-apa), bukan crash.
