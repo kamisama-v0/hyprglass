@@ -278,6 +278,26 @@ float kyantCircleMap(float x) {
     return 1.0 - sqrt(max(1.0 - x * x, 0.0));
 }
 
+// Alpha-mask layers (e.g. a full-screen notification surface holding several cards) have no
+// box that matches the visible shape, so the box SDF above would measure the SCREEN edge.
+// There the rim distance comes from the mask itself: march outward along one axis until the
+// mask alpha drops below the threshold. Capped at the lens band, so the interior costs 4 probes.
+float kyantMaskInside(vec2 uvp) {
+    vec2 m = uvp * maskUVScale + maskUVOffset;
+    if (m.x < 0.0 || m.y < 0.0 || m.x > 1.0 || m.y > 1.0) return 0.0;
+    return step(maskAlphaThreshold, texture(maskTex, m).a);
+}
+
+float kyantMaskDist(vec2 uv, vec2 dirPx, float capPx) {
+    if (kyantMaskInside(uv + dirPx * capPx * invFullSize) > 0.5) return capPx + 1.0;   // whole band inside
+    float stepPx = max(capPx / 12.0, 1.0);
+    for (int i = 1; i <= 12; i++) {
+        float t = float(i) * stepPx;
+        if (kyantMaskInside(uv + dirPx * t * invFullSize) < 0.5) return t - 0.5 * stepPx;
+    }
+    return capPx + 1.0;
+}
+
 // ============================================================================
 // MAIN — Thick-glass refraction model
 // ============================================================================
@@ -391,7 +411,28 @@ void main() {
 
     // Kyant lens (kara): replaces / blends with the edge refraction above.
     vec2 kyantDispersion = vec2(0.0);
-    if (edgeLens > 0.001) {
+    if (edgeLens > 0.001 && hasMask && maskMode == 0) {
+        // mask-derived rim (see kyantMaskDist): band/amount in px against a 64 px reference
+        // short side (a dock pill / notification card), scaled per monitor
+        float kH      = max(edgeLensHeight * 64.0 * monitorScale, 1.0);
+        float kAmount = edgeLensAmount * 64.0 * monitorScale;
+        float dl = kyantMaskDist(uv, vec2(-1.0, 0.0), kH);
+        float dr = kyantMaskDist(uv, vec2( 1.0, 0.0), kH);
+        float du = kyantMaskDist(uv, vec2(0.0, -1.0), kH);
+        float dd = kyantMaskDist(uv, vec2(0.0,  1.0), kH);
+        vec2  pen = vec2(max(kH - min(dl, dr), 0.0), max(kH - min(du, dd), 0.0)); // penetration into the band
+        float penLen = length(pen);
+        vec2  kOffPx = vec2(0.0);
+        if (penLen > 0.0) {
+            vec2  s     = vec2(dl < dr ? -1.0 : 1.0, du < dd ? -1.0 : 1.0);        // toward the nearer edge
+            vec2  kg    = s * pen / penLen;                                        // outward, round in corners
+            float depth = clamp(kH - penLen, 0.0, kH);
+            float kd    = kyantCircleMap(1.0 - depth / kH) * kAmount;
+            kOffPx = kd * kg;
+            kyantDispersion = kOffPx * chromaticAberration * s.x * s.y * min(penLen / kH, 1.0) * invFullSize;
+        }
+        baseOffset = mix(baseOffset, kOffPx * invFullSize, edgeLens);
+    } else if (edgeLens > 0.001) {
         vec2  kHalf   = glassBoxSizePx * 0.5;
         vec2  kc      = uv * fullSize - glassBoxOffsetPx - kHalf;
         float kMin    = min(kHalf.x, kHalf.y);
